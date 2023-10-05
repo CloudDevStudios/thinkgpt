@@ -74,9 +74,11 @@ ABSTRACTION_PROMPT = FewShotPromptTemplate(
 class RememberOutputParser(BaseOutputParser[Dict]):
 
     def parse(self, text: str) -> Dict:
-        # Greedy search for 1st json candidate.
-        match = re.match(r"^REMEMBER\((.*)\)$", text.strip().strip('"\'.'), re.MULTILINE | re.IGNORECASE | re.DOTALL)
-        if match:
+        if match := re.match(
+            r"^REMEMBER\((.*)\)$",
+            text.strip().strip('"\'.'),
+            re.MULTILINE | re.IGNORECASE | re.DOTALL,
+        ):
             return {'action': 'REMEMBER', 'value': match.group(1)}
         else:
             return {'action': 'FINISH', 'value': text.strip()}

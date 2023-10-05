@@ -52,12 +52,13 @@ class SelectOutputParser(BaseOutputParser[List[str]]):
     options: List[str]
 
     def parse(self, text: str) -> List[str]:
-        results = []
         answers = text.split('\n')
-        for answer in answers:
-            if answer.strip().lower() in [option.lower() for option in self.options]:
-                results.append(answer.strip())
-        return results
+        return [
+            answer.strip()
+            for answer in answers
+            if answer.strip().lower()
+            in [option.lower() for option in self.options]
+        ]
 
 
 class SelectChain(LLMChain):
