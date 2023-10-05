@@ -35,28 +35,30 @@ class SummarizeMixin:
     summarize_chain: SummarizeChain
 
     def summarize(self, content: str, max_tokens: int = 4096, instruction_hint: str = '') -> str:
-        response = self.summarize_chain.predict(
+        return self.summarize_chain.predict(
             # TODO: should retrieve max tokens from the llm if None
-            content=content, instruction_hint=instruction_hint, max_tokens=max_tokens
+            content=content,
+            instruction_hint=instruction_hint,
+            max_tokens=max_tokens,
         )
-        return response
 
     def chunked_summarize(self, content: str, max_tokens: int = 4096, instruction_hint: str = '') -> str:
         num_tokens = self.summarize_chain.llm.get_num_tokens(content)
 
-        if num_tokens > max_tokens:
-            avg_chars_per_token = len(content) / num_tokens
-            chunk_size = int(avg_chars_per_token * self.summarize_chain.summarizer_chunk_size)
-            chunks = textwrap.wrap(content, chunk_size)
-            summary_size = int(max_tokens / len(chunks))
-            result = ""
-
-
-            for chunk in chunks:
-                result += self.summarize(content=chunk, max_tokens=summary_size, instruction_hint=instruction_hint)
-        else:
+        if num_tokens <= max_tokens:
             return content
-        return result
+        avg_chars_per_token = len(content) / num_tokens
+        chunk_size = int(avg_chars_per_token * self.summarize_chain.summarizer_chunk_size)
+        chunks = textwrap.wrap(content, chunk_size)
+        summary_size = max_tokens // len(chunks)
+        return "".join(
+            self.summarize(
+                content=chunk,
+                max_tokens=summary_size,
+                instruction_hint=instruction_hint,
+            )
+            for chunk in chunks
+        )
 
 
 if __name__ == '__main__':

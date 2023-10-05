@@ -32,7 +32,6 @@ for observation in llm.remember(limit=10):
         refined_memory.append(new_observation)
     elif choice.lower() == 'remove':
         print(f'removed "{observation}"')
-        pass
     elif choice.lower() == 'keep':
         refined_memory.append(observation)
 
